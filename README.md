@@ -101,6 +101,8 @@ This are the 3D printed parts used to hold the blade and connected with stepper 
 at the one end, 
 
 When stepper motor rotate the blade will move up adn down
+
+
 ![image](https://user-images.githubusercontent.com/19898602/147902927-e3839d79-8aef-4292-8714-fc71d8e50f66.png)
 
 
