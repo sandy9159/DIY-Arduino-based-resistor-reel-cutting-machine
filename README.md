@@ -70,10 +70,180 @@ This is the link of [PCB editabl file](https://oshwlab.com/sharmaz747/multipurpo
 
 If you seriously need quality PCB quickly in your hand then you must have to try [JLCPCB](https://jlcpcb.com/IAT ) PCB manufacturing service.
 They have Special offer of $2 for 1-4 Layer PCBs, free SMT assembly monthly.
-If you get yourself registered today at [JLCPCB](https://jlcpcb.com/IAT ) you get 18$ welcome coupon from [JLCPCB](https://jlcpcb.com/IAT ).
+If you get yourself registered today at [JLCPCB](https://jlcpcb.com/IAT ) you get 27$ welcome coupon from [JLCPCB](https://jlcpcb.com/IAT ).
+
+
+![image](https://user-images.githubusercontent.com/19898602/147902413-8c479fb7-86f1-4295-b4b9-e4c6cfd24a4a.png)
+![image](https://user-images.githubusercontent.com/19898602/147902429-2381ce25-9def-4ef0-b7bf-b4dddc201822.png)
+
+first of all I cut the 12mm wooden sheet in reuired length
+
+then i placed rubber legs at the bottom of the wooden sheet
+
+![image](https://user-images.githubusercontent.com/19898602/147902463-bb8ade28-9079-4cd0-959e-91fd8a79292c.png)
+![image](https://user-images.githubusercontent.com/19898602/147902483-122b47b6-f7a8-4d28-a620-77b7b445a302.png)
+
+Now I prepare a resistor reel pulling mechanism using some threaded rod and 
+bearing
+
+I 3D Printed yellow part in PLA material the I place the roller mechanism in the grove made in 3D printed parts
+then I place the pillow bearing on the 3D printed part 8mm SS rod will went inside to this roller
+
+![image](https://user-images.githubusercontent.com/19898602/147902770-7d411902-4a60-4ff0-a3f4-f272bfb1f0c1.png)
+![image](https://user-images.githubusercontent.com/19898602/147902790-c85a6ac5-c018-4d19-a2d7-b7c2a72b21b8.png)
+
+then I cut the acrylic sheet in to make resistor reel guide 
+resistor reel will pass through this acrylic guid and reach to the cutting blade.
+
+![image](https://user-images.githubusercontent.com/19898602/147902865-633e2789-f022-4119-92fa-3103ce09d031.png)
+
+This are the 3D printed parts used to hold the blade and connected with stepper motor shaft 
+at the one end, 
+
+When stepper motor rotate the blade will move up adn down
+![image](https://user-images.githubusercontent.com/19898602/147902927-e3839d79-8aef-4292-8714-fc71d8e50f66.png)
+
+
+Then I placed the stepper motor and all white 3D printed parts on 4mm wooden sheet 
+and the this wooden sheet is vertically placed on the 20x20 extrustion profile 
+
+in this way basic cunstruction of machien is completed now we will look for code
+
+````
+
+#include <Stepper.h>
+#include <Arduino.h>
+#include "BasicStepperDriver.h"
+#include "MultiDriver.h"
+#include "SyncDriver.h"
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(2, 3); // RX, TX
+int A = 0;
+int B = 0;
+int state = 0;
+String message;
+int QTY, numMessages, endBytes;
+byte inByte;
+int flag = 0;
+
+
+Stepper myStepper(200, 8, 7, 10, 11);
+#define MOTOR_STEPS 200
+#define DIR_X 14
+#define STEP_X 15
+#define DIR_Y 16
+#define STEP_Y 17
+#define MICROSTEPS 16
+#define EN 9
+int nos = 35;
+int UP = 80;
+int DOWN = -80;
+int count = 1;
+BasicStepperDriver stepperX(MOTOR_STEPS, DIR_X, STEP_X);
+BasicStepperDriver stepperY(MOTOR_STEPS, DIR_Y, STEP_Y);
+SyncDriver controller(stepperX, stepperY);
+
+
+void setup()
+{
+  numMessages, endBytes = 0;
+  pinMode(EN, OUTPUT);
+  digitalWrite(EN, HIGH);
+  myStepper.setSpeed(60);
+  Serial.begin(9600);
+  mySerial.begin(9600);
+  stepperX.begin(20, MICROSTEPS);
+  stepperY.begin(20, MICROSTEPS);
+  delay(500);
+  controller.rotate(UP, UP);
+  delay(500);
+}
+
+void loop()
+{
+  data();
+  count=1;
+  if (A > 0 && B > 0) {
+    delay(1000);
+    
+
+    for (int i = 0; i < B; i++) {
+
+      myStepper.step(A * nos);
+      delay(500);
+      stepperX.begin(1000, MICROSTEPS);
+      stepperY.begin(1000, MICROSTEPS);
+      controller.rotate(DOWN, DOWN);
+      delay(500);
+      stepperX.begin(75, MICROSTEPS);
+      stepperY.begin(75, MICROSTEPS);
+      controller.rotate(UP, UP);
+      delay(500);
+//Serial.print("done = ");
+mySerial.print("n2.val=");
+mySerial.print(count);
+mySerial.write(0xff);
+mySerial.write(0xff);
+mySerial.write(0xff);
+count++;
+
+    }
+    A=0;
+    B=0;
+
+  }
+}
+
+  void data() {
+    if (state < 1) {
+      if (numMessages == 1) { //Did we receive the anticipated number of messages? In this case we only want to receive 1 message.
+        A = QTY;
+       // Serial.println(A);//See what the important message is that the Arduino receives from the Nextion
+        numMessages = 0; //Now that the entire set of data is received, reset the number of messages received
+        state = 1;
+      }
+    }
+
+    if (state > 0) {
+      if (numMessages == 1) { //Did we receive the anticipated number of messages? In this case we only want to receive 1 message.
+        B = QTY;
+       // Serial.println(B);//See what the important message is that the Arduino receives from the Nextion
+        numMessages = 0; //Now that the entire set of data is received, reset the number of messages received
+        state = 0;
+      }
+    }
 
 
 
-![image](https://user-images.githubusercontent.com/19898602/146788317-2ddca867-0577-43fe-85a2-50ce2d472908.png)
-![image](https://user-images.githubusercontent.com/19898602/146788359-422399b1-5514-4ffe-b769-184390f4c7ae.png)
+
+
+
+    if (mySerial.available()) { //Is data coming through the serial from the Nextion?
+      inByte = mySerial.read();
+
+      // Serial.println(inByte); //See the data as it comes in
+
+      if (inByte > 47 && inByte < 58) { //Is it data that we want to use?
+        message.concat(char(inByte)); //Cast the decimal number to a character and add it to the message
+      }
+      else if (inByte == 255) { //Is it an end byte?
+        endBytes = endBytes + 1; //If so, count it as an end byte.
+      }
+
+      if (inByte == 255 && endBytes == 3) { //Is it the 3rd (aka last) end byte?
+        QTY = message.toInt(); //Because we have now received the whole message, we can save it in a variable.
+        message = ""; //We received the whole message, so now we can clear the variable to avoid getting mixed messages.
+        endBytes = 0; //We received the whole message, we need to clear the variable so that we can identify the next message's end
+        numMessages  = numMessages + 1; //We received the whole message, therefore we increment the number of messages received.
+
+        //Now lets test if it worked by playing around with the variable.
+
+      }
+    }
+  }
+  
+  ````
+  
+  
+
 
